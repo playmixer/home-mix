@@ -18,11 +18,29 @@ func Ping(ip string) (bool, error) {
 	}
 
 	pinger.SetPrivileged(true)
-	pinger.Timeout = time.Second * 2
+	pinger.Timeout = time.Second * 1
 	pinger.Count = 1
+	done := make(chan struct{})
+	timeout := make(chan struct{})
+	go func() {
+		tick := time.NewTicker(time.Millisecond * 900)
+		select {
+		case <-tick.C:
+			close(timeout)
+			pinger.Stop()
+		case <-done:
+		}
+	}()
 	err = pinger.Run()
+	close(done)
 	if err != nil {
 		return false, err
+	}
+
+	select {
+	case <-timeout:
+		return false, nil
+	default:
 	}
 
 	return true, nil
