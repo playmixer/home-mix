@@ -136,7 +136,6 @@ mainLoop:
 							return
 						}
 					}
-					time.Sleep(time.Second)
 				}(ip)
 			}
 

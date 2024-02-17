@@ -20,7 +20,7 @@ func Ping(ip string) (bool, error) {
 
 	pinger.SetPrivileged(true)
 	pinger.Timeout = time.Second * 3
-	pinger.Count = 2
+	pinger.Count = 4
 	done := make(chan struct{})
 	timeout := make(chan struct{})
 	go func() {
