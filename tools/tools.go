@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"os"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -18,12 +19,12 @@ func Ping(ip string) (bool, error) {
 	}
 
 	pinger.SetPrivileged(true)
-	pinger.Timeout = time.Second * 1
-	pinger.Count = 1
+	pinger.Timeout = time.Second * 3
+	pinger.Count = 2
 	done := make(chan struct{})
 	timeout := make(chan struct{})
 	go func() {
-		tick := time.NewTicker(time.Millisecond * 900)
+		tick := time.NewTicker(time.Second*2 + time.Millisecond*900)
 		select {
 		case <-tick.C:
 			close(timeout)
@@ -44,4 +45,13 @@ func Ping(ip string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func Getenv(name, def string) string {
+	val := os.Getenv(name)
+	if val == "" {
+		val = def
+	}
+
+	return val
 }

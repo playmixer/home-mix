@@ -100,7 +100,7 @@ proccessLoop:
 func handlePing(ctx context.Context) {
 	defer wg.Done()
 	t := tools.NewThread()
-	t.SetMax(1)
+	t.SetMax(5)
 
 	conn, err := database.Connect()
 	if err != nil {
