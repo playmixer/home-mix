@@ -19,12 +19,12 @@ func Ping(ip string) (bool, error) {
 	}
 
 	pinger.SetPrivileged(true)
-	pinger.Timeout = time.Second * 3
+	pinger.Timeout = time.Second * 4
 	pinger.Count = 4
 	done := make(chan struct{})
 	timeout := make(chan struct{})
 	go func() {
-		tick := time.NewTicker(time.Second*2 + time.Millisecond*900)
+		tick := time.NewTicker(time.Second*3 + time.Millisecond*900)
 		select {
 		case <-tick.C:
 			close(timeout)
