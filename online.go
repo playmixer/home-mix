@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/playmixer/corvid/logger"
 	"github.com/playmixer/home-mix/database"
@@ -40,6 +41,9 @@ func handlePing(ctx context.Context) {
 		panic(err)
 	}
 
+	tick1min := time.NewTicker(time.Minute)
+	updateApr()
+
 mainLoop:
 	for {
 		log.INFO("Start ping pool")
@@ -50,6 +54,8 @@ mainLoop:
 			case <-ctx.Done():
 				log.INFO("Stop ping")
 				break mainLoop
+			case <-tick1min.C:
+				updateApr()
 			default:
 				t.Wait()
 				ip := d.IP
@@ -79,4 +85,23 @@ mainLoop:
 		log.INFO("stop ping pool")
 	}
 
+}
+
+func updateApr() {
+	conn, err := database.Connect()
+	if err != nil {
+		log.ERROR(err.Error())
+		panic(err)
+	}
+
+	log.INFO("upd arp data")
+	addrs := tools.ARP()
+	for k, v := range addrs {
+		ping := database.Ping{IP: k}
+		conn.Where(&ping).First(&ping)
+		if ping.ID > 0 {
+			ping.Mac = v
+			conn.Save(&ping)
+		}
+	}
 }
