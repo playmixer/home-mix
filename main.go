@@ -50,6 +50,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go handlePing(ctx)
 	go proccess(ctx)
+	go startHttp()
 
 	done := make(chan os.Signal, 10)
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)

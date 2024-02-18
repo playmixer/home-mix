@@ -14,6 +14,7 @@ RUN go mod download
 COPY *.go ./
 COPY ./tools ./tools
 COPY ./database ./database
+COPY ./www ./www
 
 # compile application
 RUN go build -o /godocker
