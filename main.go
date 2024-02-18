@@ -24,19 +24,10 @@ type ChangeIp struct {
 }
 
 var (
-	log          = logger.New("log")
-	logPing      = logger.New("ping")
-	wg           = sync.WaitGroup{}
-	chanIpStatus = make(chan ChangeIp, 10)
-	bot          *tgbotapi.BotAPI
+	log = logger.New("log")
+	wg  = sync.WaitGroup{}
+	bot *tgbotapi.BotAPI
 )
-
-func changeIpStatus(ip, name string, online bool) {
-	select {
-	case chanIpStatus <- ChangeIp{IP: ip, Name: name, Online: online}:
-	default:
-	}
-}
 
 func init() {
 	err := godotenv.Load()
@@ -45,6 +36,7 @@ func init() {
 	}
 
 	database.Init()
+	tools.Init()
 
 	bot, err = tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_API_KEY"))
 	if err != nil {
@@ -56,7 +48,6 @@ func init() {
 func main() {
 	log.INFO("Starting ...")
 	ctx, cancel := context.WithCancel(context.Background())
-	wg.Add(1)
 	go handlePing(ctx)
 	go proccess(ctx)
 
@@ -95,52 +86,4 @@ proccessLoop:
 			}
 		}
 	}
-}
-
-func handlePing(ctx context.Context) {
-	defer wg.Done()
-	t := tools.NewThread()
-	t.SetMax(5)
-
-	conn, err := database.Connect()
-	if err != nil {
-		log.ERROR(err.Error())
-		panic(err)
-	}
-
-mainLoop:
-	for {
-		for i := 1; i <= 254; i++ {
-			select {
-			case <-ctx.Done():
-				log.INFO("Stop ping")
-				break mainLoop
-			default:
-				t.Wait()
-				ip := fmt.Sprintf("192.168.0.%v", i)
-				t.Add()
-				go func(addres string) {
-					defer t.Done()
-					ok, _ := tools.Ping(addres)
-					logPing.INFO(fmt.Sprintf("ping %s %v", addres, ok))
-
-					ping := database.Ping{IP: addres}
-					conn.Where(&ping).First(&ping)
-
-					if ping.Online != ok {
-						ping.Online = ok
-						changeIpStatus(ping.IP, ping.Name, ping.Online)
-						tx := conn.Save(&ping)
-						if tx.Error != nil {
-							log.ERROR("error: cant update row", addres, err.Error())
-							return
-						}
-					}
-				}(ip)
-			}
-
-		}
-		t.WaitAll()
-	}
-
 }
