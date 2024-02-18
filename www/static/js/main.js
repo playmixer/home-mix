@@ -1,4 +1,4 @@
-const API = "http://localhost:8090/api/v0"
+const API = "/api/v0"
 const tableData = document.getElementById("table_data")
 
 
