@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -129,11 +130,24 @@ func Getenv(name, def string) string {
 func ARP() map[string]string {
 	res := make(map[string]string)
 	if !isWindows() {
-		output, err := exec.Command("arp", "-a").CombinedOutput()
+		// output, err := exec.Command("arp", "-a").CombinedOutput()
+		// if err != nil {
+		// 	log.ERROR(err.Error())
+		// 	return res
+		// }
+
+		f, err := os.Open("/app/data/arp.log")
 		if err != nil {
 			log.ERROR(err.Error())
 			return res
 		}
+
+		output, err := io.ReadAll(f)
+		if err != nil {
+			log.ERROR(err.Error())
+			return res
+		}
+
 		// output = []byte(`? (192.168.0.21) at <incomplete> on enp3s0
 		// ? (192.168.0.4) at <incomplete> on enp3s0
 		// ? (192.168.0.78) at <incomplete> on enp3s0

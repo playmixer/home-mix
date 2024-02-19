@@ -41,7 +41,7 @@ func handlePing(ctx context.Context) {
 		panic(err)
 	}
 
-	tick1min := time.NewTicker(time.Minute)
+	tick1min := time.NewTicker(time.Minute * 10)
 	updateApr()
 
 mainLoop:
@@ -97,6 +97,17 @@ func updateApr() {
 	log.INFO("upd arp data")
 	addrs := tools.ARP()
 	for k, v := range addrs {
+		mac := database.Ping{Mac: v}
+		conn.Where(&mac).First(&mac)
+		if mac.ID > 0 {
+			if mac.IP == k {
+				continue
+			} else {
+				mac.Mac = ""
+				conn.Save(&mac)
+			}
+		}
+
 		ping := database.Ping{IP: k}
 		conn.Where(&ping).First(&ping)
 		if ping.ID > 0 {
