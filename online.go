@@ -41,7 +41,7 @@ func handlePing(ctx context.Context) {
 		panic(err)
 	}
 
-	tick1min := time.NewTicker(time.Minute * 10)
+	tick1min := time.NewTicker(time.Minute * 60)
 	updateApr()
 
 mainLoop:

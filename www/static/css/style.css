@@ -6,3 +6,11 @@ table {
 table, th, td {
     border: 1px solid;
 }
+
+td.online {
+    color: green !important; 
+}
+
+td.offline {
+    color: red !important;
+}

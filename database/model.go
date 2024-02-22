@@ -10,3 +10,9 @@ type Ping struct {
 	Look   bool
 	gorm.Model
 }
+
+type Device struct {
+	gorm.Model
+	Mac   string
+	Owner string
+}

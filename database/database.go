@@ -33,6 +33,7 @@ func Init() {
 
 	conn, _ := Connect()
 	conn.AutoMigrate(&Ping{})
+	conn.AutoMigrate(&Device{})
 }
 
 func Connect() (*gorm.DB, error) {

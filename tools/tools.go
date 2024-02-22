@@ -22,11 +22,14 @@ var (
 	count    int
 	timeWite time.Duration
 	osystem  string
+	arpLog   string
 )
 
 func Init() {
 	var err error
 	osystem = runtime.GOOS
+
+	arpLog = Getenv("ARP_LOG", "/app/data/arp.log")
 
 	eTimeout := Getenv("PING_TIMEOUT", "4000")
 	eCount := Getenv("PING_COUNT", "3")
@@ -127,6 +130,14 @@ func Getenv(name, def string) string {
 	return val
 }
 
+func GetARP(ctx context.Context) ([]byte, error) {
+	output, err := exec.CommandContext(ctx, "arp", "-a").CombinedOutput()
+	if err != nil {
+		return output, err
+	}
+	return output, nil
+}
+
 func ARP() map[string]string {
 	res := make(map[string]string)
 	if !isWindows() {
@@ -136,7 +147,7 @@ func ARP() map[string]string {
 		// 	return res
 		// }
 
-		f, err := os.Open("/app/data/arp.log")
+		f, err := os.Open(arpLog)
 		if err != nil {
 			log.ERROR(err.Error())
 			return res
